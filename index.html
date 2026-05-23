@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JJ Café Expresso — Experiência Premium & Gestão</title>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800;900&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <style>
+        :root {
+            --cafe-deep: #1a0f0d;
+            --cafe-dark: #2d1a15;
+            --cafe-medium: #4e342e;
+            --cafe-latte: #8d6e63;
+            --cafe-gold: #c4a484;
+            --creme-light: #fdfbf7;
+            --creme-latte: #f5ebe6;
+            --overlay: rgba(26, 15, 13, 0.85);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--creme-light);
+            color: var(--cafe-deep);
+        }
+
+        h1, h2, h3, .font-serif {
+            font-family: 'Playfair Display', serif;
+        }
+
+        /* Barra de rolagem personalizada em tons de café */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: var(--creme-latte); }
+        ::-webkit-scrollbar-thumb { background: var(--cafe-medium); border-radius: 10px; }
+
+        .hero-bg {
+            background-image: linear-gradient(var(--overlay), var(--overlay)), url('https://images.unsplash.com/photo-1559056199-641a0ac8b55e?q=80&w=2070&auto=format&fit=crop');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .menu-tab-active {
+            background-color: var(--cafe-deep);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(26, 15, 13, 0.15);
+        }
+
+        .product-card:hover .product-img {
+            transform: scale(1.05);
+        }
+
+        @keyframes float {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0px); }
+        }
+        .animate-float { animation: float 6s ease-in-out infinite; }
+
+        /* Ocultar painéis inativos do ecrã de gestão */
+        .tab-panel { display: none; }
+        .tab-panel.active { display: block; }
+    </style>
+</head>
+<body class="overflow-x-hidden">
+
+    <header class="fixed w-full z-40 transition-all duration-300" id="mainHeader">
+        <div class="container mx-auto px-6 py-4 flex justify-between items-center">
+            <div class="flex items-center gap-3 group cursor-pointer" onclick="scrollToSection('home')">
+                <div class="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-lg group-hover:rotate-12 transition-transform">
+                    <span class="text-xl">☕</span>
+                </div>
+                <span class="text-xl font-extrabold tracking-tighter text-white drop-shadow-md" id="logoText">JJ CAFÉ</span>
+            </div>
+            
+            <nav class="hidden md:flex gap-8 text-xs font-bold uppercase tracking-[0.2em] text-white/80" id="mainNav">
+                <a href="#home" class="hover:text-white transition-colors">Início</a>
+                <a href="#cardapio" class="hover:text-white transition-colors">Menu</a>
+                <a href="#sobre" class="hover:text-white transition-colors">Origem</a>
+                <a href="#contato" class="hover:text-white transition-colors">Contacto</a>
+            </nav>
+
+            <div class="flex items-center gap-4">
+                <!-- Alternador entre Área de Cliente e Painel de Gestão -->
+                <button onclick="toggleSystemView()" id="systemToggleBtn" class="bg-amber-100 hover:bg-amber-200 text-[#4E342E] px-4 py-2.5 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-md flex items-center gap-2 border border-amber-200">
+                    <i class="fa-solid fa-cash-register"></i> <span id="viewBtnText">Painel Gestão</span>
+                </button>
+                
+                <!-- Botão do Carrinho -->
+                <button onclick="toggleCartDrawer()" class="relative p-2.5 bg-white text-black rounded-full hover:bg-amber-100 transition-all shadow-md">
+                    <i class="fa-solid fa-basket-shopping text-md"></i>
+                    <span id="cartCountBadge" class="absolute -top-1 -right-1 bg-amber-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold hidden">0</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main id="customerView">
+        
+        <!-- Secção Hero -->
+        <section id="home" class="hero-bg min-h-screen flex items-center relative overflow-hidden">
+            <div class="container mx-auto px-6 pt-20">
+                <div class="flex flex-col lg:flex-row items-center gap-12">
+                    <div class="lg:w-1/2 text-white text-center lg:text-left">
+                        <div class="inline-block px-4 py-1 border border-white/30 rounded-full text-[10px] uppercase tracking-[0.3em] mb-6 animate-pulse bg-white/5">
+                            Sinta a pureza do grão
+                        </div>
+                        <h1 class="text-6xl md:text-8xl font-black mb-8 leading-[0.9]">
+                            A Arte do <br><span class="text-[#c4a484]">Espresso.</span>
+                        </h1>
+                        <p class="text-lg md:text-xl text-white/70 mb-10 max-w-xl leading-relaxed">
+                            Grãos selecionados manualmente das melhores altitudes, torrados com precisão para extrair notas de chocolate, caramelo e uma alma inesquecível.
+                        </p>
+                        <div class="flex flex-col sm:flex-row gap-5 justify-center lg:justify-start">
+                            <a href="#cardapio" class="bg-[#c4a484] text-white px-10 py-5 rounded-full font-bold text-lg hover:brightness-110 transition-all shadow-2xl flex items-center justify-center gap-2">
+                                Explorar Menu 
+                                <i class="fa-solid fa-arrow-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/2 relative">
+                        <div class="relative z-10 animate-float">
+                            <!-- Xícara com caminho local e fallback robusto com imagem idêntica à enviada -->
+                            <img src="./xicara de cafe.png
+                                 onerror="this.onerror=null; this.src='https://images.unsplash.com/photo-1507133750040-4a8f57021571?q=80&w=1000&auto=format&fit=crop';"
+                                 alt="" 
+                                 class="w-full max-w-md mx-auto rounded-[2.5rem] shadow-[0_0_50px_rgba(196,164,132,0.3)] border-4 border-[#c4a484]/30 object-cover aspect-[4/3] bg-black">
+                            
+                            <div class="absolute -top-10 -right-10 glass-effect p-6 rounded-3xl hidden md:block">
+                                <span class="block text-3xl font-bold text-white italic">85+</span>
+                                <span class="text-[10px] uppercase text-white/50 tracking-tighter">Pontos SCAA</span>
+                            </div>
+                        </div>
+                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[120%] h-[120%] border border-white/10 rounded-full pointer-events-none"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secção do Menu/Cardápio -->
+        <section id="cardapio" class="py-32 bg-white">
+            <div class="container mx-auto px-6">
+                <div class="text-center mb-20">
+                    <span class="text-[#c4a484] font-bold tracking-[0.3em] uppercase text-xs mb-4 block">A Nossa Seleção Especial</span>
+                    <h2 class="text-5xl font-black text-[#1a0f0d]">O Menu JJ</h2>
+                </div>
+
+                <!-- Abas de Filtro do Menu -->
+                <div class="flex justify-center flex-wrap gap-4 mb-16">
+                    <button onclick="filterMenu('all')" class="menu-tab px-8 py-3 rounded-full border border-gray-100 font-bold text-sm transition-all menu-tab-active" data-category="all">Todos</button>
+                    <button onclick="filterMenu('coffee')" class="menu-tab px-8 py-3 rounded-full border border-gray-100 font-bold text-sm transition-all" data-category="coffee">Cafés</button>
+                    <button onclick="filterMenu('drinks')" class="menu-tab px-8 py-3 rounded-full border border-gray-100 font-bold text-sm transition-all" data-category="drinks">Bebidas Geladas</button>
+                    <button onclick="filterMenu('food')" class="menu-tab px-8 py-3 rounded-full border border-gray-100 font-bold text-sm transition-all" data-category="food">Acompanhamentos</button>
+                </div>
+
+                <!-- Grid de Produtos -->
+                <div id="menuContainer" class="grid md:grid-cols-2 lg:grid-cols-3 gap-10">
+                    <!-- Gerado dinamicamente via Javascript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Secção Sobre / Origem -->
+        <section id="sobre" class="py-32 bg-[#fdfbf7]">
+            <div class="container mx-auto px-6">
+                <div class="flex flex-col lg:flex-row items-center gap-16">
+                    <div class="lg:w-1/2">
+                        <img src="https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=1000&auto=format&fit=crop" 
+                             alt="" 
+                             class="rounded-[2.5rem] shadow-2xl object-cover w-full h-[500px]">
+                    </div>
+                    <div class="lg:w-1/2">
+                        <span class="text-[#c4a484] font-bold tracking-[0.3em] uppercase text-xs mb-4 block">A Nossa Origem</span>
+                        <h2 class="text-5xl font-black text-[#1a0f0d] mb-8">Da Altitude à sua Xícara</h2>
+                        <p class="text-gray-600 mb-6 leading-relaxed">
+                            A nossa história começou em pequenas lavouras familiares localizadas a mais de 1.200 metros de altitude. Acreditamos que o café perfeito respeita o tempo da terra, o trabalho digno e a precisão do barista.
+                        </p>
+                        <p class="text-gray-600 mb-8 leading-relaxed">
+                            No JJ Café Expresso, cada lote passa por uma torra rigorosamente controlada para ressaltar nuances de sabores autênticos. O café não é apenas energia; é um ritual.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Secção de Contacto / Fale Connosco -->
+        <section id="contato" class="py-24 bg-[#1a0f0d] text-white">
+            <div class="container mx-auto px-6">
+                <div class="max-w-6xl mx-auto flex flex-col lg:flex-row rounded-[3rem] overflow-hidden bg-[#241715] shadow-2xl">
+                    <div class="lg:w-1/2 p-12 lg:p-20 bg-cover bg-center relative" style="background-image: url('https://images.unsplash.com/photo-1495474472287-4d71bcdd2085?q=80&w=1000&auto=format&fit=crop');">
+                        <div class="absolute inset-0 bg-[#1a0f0d]/80"></div>
+                        <div class="relative z-10 h-full flex flex-col justify-between">
+                            <div>
+                                <h2 class="text-4xl font-bold mb-8">Vivencie o Ritual.</h2>
+                                <p class="text-white/60 mb-12">Estamos no coração da cidade à sua espera.</p>
+                                
+                                <ul class="space-y-6">
+                                    <li class="flex gap-4">
+                                        <span class="text-[#c4a484]"><i class="fa-solid fa-map-location-dot"></i></span>
+                                        <div>
+                                            <b class="block text-sm uppercase">Endereço</b>
+                                            <span class="text-sm text-white/50">Av. dos Cafeicultores, 900 - Jardins</span>
+                                        </div>
+                                    </li>
+                                    <li class="flex gap-4">
+                                        <span class="text-[#c4a484]"><i class="fa-solid fa-clock"></i></span>
+                                        <div>
+                                            <b class="block text-sm uppercase">Horário</b>
+                                            <span class="text-sm text-white/50">Seg a Sáb: 08:00 - 20:00</span>
+                                        </div>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lg:w-1/2 p-12 lg:p-20">
+                        <form id="feedbackForm" onsubmit="handleContactSubmit(event)" class="space-y-8">
+                            <div>
+                                <label class="block text-[10px] uppercase tracking-[0.2em] font-bold text-[#c4a484] mb-3">Nome Completo</label>
+                                <input type="text" id="contactName" placeholder="Como o podemos chamar?" required class="w-full bg-transparent border-b border-white/10 py-4 focus:border-[#c4a484] outline-none transition-all placeholder:text-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase tracking-[0.2em] font-bold text-[#c4a484] mb-3">O Seu E-mail</label>
+                                <input type="email" id="contactEmail" placeholder="Para enviarmos novidades" required class="w-full bg-transparent border-b border-white/10 py-4 focus:border-[#c4a484] outline-none transition-all placeholder:text-white/20 text-white">
+                            </div>
+                            <div>
+                                <label class="block text-[10px] uppercase tracking-[0.2em] font-bold text-[#c4a484] mb-3">Mensagem</label>
+                                <textarea id="contactMsg" rows="3" placeholder="Fale sobre o seu evento ou dúvida..." required class="w-full bg-transparent border-b border-white/10 py-4 focus:border-[#c4a484] outline-none transition-all placeholder:text-white/20 text-white resize-none"></textarea>
+                            </div>
+                            <button type="submit" class="w-full bg-white text-black py-5 rounded-2xl font-bold uppercase tracking-widest hover:bg-[#c4a484] hover:text-white transition-all shadow-xl">
+                                Enviar Mensagem
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Painel Administrativo / Staff -->
+    <main id="staffView" class="hidden pt-28 min-h-screen bg-slate-50">
+        <div class="container mx-auto px-6 py-8">
+            <!-- Cabeçalho do Painel -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                <div>
+                    <h1 class="text-3xl font-black text-slate-800">Painel Operacional JJ</h1>
+                    <p class="text-slate-500">Controlo de mesas, faturação diária e caixa.</p>
+                </div>
+                <!-- Estado do Caixa -->
+                <div class="flex items-center gap-3 bg-white p-4 rounded-2xl shadow-sm border border-slate-200">
+                    <span class="w-3.5 h-3.5 rounded-full bg-emerald-500 animate-pulse" id="cashierStatusIndicator"></span>
+                    <div>
+                        <span class="text-xs uppercase font-extrabold tracking-wider text-slate-400 block">Estado do Caixa</span>
+                        <span class="text-sm font-bold text-slate-800" id="cashierStatusText">Aberto</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navegação Interna de Gestão -->
+            <div class="flex border-b border-slate-200 gap-6 mb-8 overflow-x-auto">
+                <button onclick="switchStaffTab('mesas')" class="staff-tab py-4 font-bold text-sm tracking-wider uppercase border-b-2 border-amber-600 text-amber-600 transition-all flex items-center gap-2" id="tabBtn-mesas">
+                    <i class="fa-solid fa-mug-saucer"></i> Mesas & Pedidos
+                </button>
+                <button onclick="switchStaffTab('faturamento')" class="staff-tab py-4 font-bold text-sm tracking-wider uppercase border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all flex items-center gap-2" id="tabBtn-faturamento">
+                    <i class="fa-solid fa-chart-line"></i> Histórico de Faturação
+                </button>
+                <button onclick="switchStaffTab('caixa')" class="staff-tab py-4 font-bold text-sm tracking-wider uppercase border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-all flex items-center gap-2" id="tabBtn-caixa">
+                    <i class="fa-solid fa-cash-register"></i> Fecho de Caixa
+                </button>
+            </div>
+
+            <!-- Secção das Mesas -->
+            <div id="panel-mesas" class="tab-panel active">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-xl font-bold text-slate-800">Mapa de Mesas</h3>
+                            <span class="text-xs text-slate-500 font-medium">Selecione uma mesa para ver o consumo e efetuar o pagamento</span>
+                        </div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4" id="tablesGridContainer">
+                            <!-- Gerado via Javascript -->
+                        </div>
+                    </div>
+
+                    <!-- Detalhes da Mesa Selecionada -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-3xl p-6 shadow-md border border-slate-100" id="tableDetailsCard">
+                            <div class="text-center py-12 text-slate-400">
+                                <i class="fa-solid fa-mug-hot text-4xl mb-4 text-slate-300"></i>
+                                <p class="font-bold">Nenhuma mesa selecionada</p>
+                                <p class="text-xs mt-2">Clique numa mesa no mapa para gerir o consumo e realizar a liquidação.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secção de Faturação -->
+            <div id="panel-faturamento" class="tab-panel">
+                <div class="grid lg:grid-cols-4 gap-8 mb-8">
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-700 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-receipt"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 block uppercase">Total Transações</span>
+                            <span class="text-2xl font-black text-slate-800" id="statTotalTrans">0</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-money-bill-trend-up"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 block uppercase">Faturação Total</span>
+                            <span class="text-2xl font-black text-slate-800" id="statTotalFaturado">R$ 0,00</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-mug-saucer"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 block uppercase">Mesa mais Ativa</span>
+                            <span class="text-2xl font-black text-slate-800" id="statBestTable">-</span>
+                        </div>
+                    </div>
+                    <div class="bg-white p-6 rounded-3xl shadow-sm border border-slate-100 flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-2xl bg-rose-50 text-rose-700 flex items-center justify-center text-xl">
+                            <i class="fa-solid fa-credit-card"></i>
+                        </div>
+                        <div>
+                            <span class="text-xs font-semibold text-slate-400 block uppercase">Principal Canal</span>
+                            <span class="text-2xl font-black text-slate-800" id="statMainPayment">-</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Histórico de Transações -->
+                <div class="bg-white rounded-3xl p-8 shadow-sm border border-slate-100">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold text-slate-800">Histórico de Contas Fechadas</h3>
+                        <button onclick="clearBillingHistory()" class="text-rose-600 hover:text-rose-800 text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                            <i class="fa-solid fa-trash-can"></i> Limpar Histórico
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-slate-100 text-slate-400 text-xs uppercase font-extrabold tracking-wider">
+                                    <th class="py-4 px-4">Comprovativo</th>
+                                    <th class="py-4 px-4">Mesa</th>
+                                    <th class="py-4 px-4">Hora</th>
+                                    <th class="py-4 px-4">Itens</th>
+                                    <th class="py-4 px-4">Método</th>
+                                    <th class="py-4 px-4 text-right">Total Pago</th>
+                                </tr>
+                            </thead>
+                            <tbody id="billingHistoryTableBody">
+                                <!-- Gerado via Javascript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Secção do Caixa -->
+            <div id="panel-caixa" class="tab-panel">
+                <div class="grid lg:grid-cols-3 gap-8">
+                    <div class="lg:col-span-2 space-y-6">
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                            <h3 class="text-xl font-bold text-slate-800 mb-6">Fluxo Financeiro do Caixa</h3>
+                            <div class="grid grid-cols-2 gap-6 mb-8">
+                                <div class="bg-slate-50 p-6 rounded-2xl">
+                                    <span class="text-xs font-semibold text-slate-400 block uppercase mb-1">Abertura de Caixa (Fundo)</span>
+                                    <span class="text-xl font-bold text-slate-800" id="cashierInitialAmount">R$ 150,00</span>
+                                </div>
+                                <div class="bg-slate-50 p-6 rounded-2xl">
+                                    <span class="text-xs font-semibold text-slate-400 block uppercase mb-1">Vendas Acumuladas</span>
+                                    <span class="text-xl font-bold text-[#4E342E]" id="cashierSalesAmount">R$ 0,00</span>
+                                </div>
+                            </div>
+
+                            <h4 class="font-bold text-slate-700 mb-4 text-sm uppercase tracking-wider">Distribuição por Método de Recebimento</h4>
+                            <div class="space-y-4" id="paymentMethodBreakdownContainer">
+                                <!-- Gerado via Javascript -->
+                            </div>
+                        </div>
+
+                        <!-- Sangrias e Suprimentos -->
+                        <div class="bg-white p-8 rounded-3xl shadow-sm border border-slate-100">
+                            <h3 class="text-xl font-bold text-slate-800 mb-6">Ajuste de Saldo (Suprimento / Sangria)</h3>
+                            <form id="cashAdjustmentForm" onsubmit="handleCashAdjustment(event)" class="grid sm:grid-cols-3 gap-4 items-end">
+                                <div>
+                                    <label class="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">Tipo de Entrada</label>
+                                    <select id="adjustmentType" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-sm font-semibold outline-none focus:border-amber-600">
+                                        <option value="suprimento">Suprimento (Fundo de Maneio)</option>
+                                        <option value="sangria">Sangria (Retirada de Dinheiro)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs uppercase font-extrabold tracking-wider text-slate-400 mb-2">Valor (R$)</label>
+                                    <input type="number" step="0.01" id="adjustmentValue" placeholder="0,00" required class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-sm outline-none focus:border-amber-600">
+                                </div>
+                                <div>
+                                    <button type="submit" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all">
+                                        Registar
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Botão para Fecho de Turno -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-gradient-to-br from-amber-900 to-amber-950 text-white rounded-3xl p-8 shadow-lg">
+                            <h3 class="text-2xl font-black mb-4">Fechar Turno do Caixa</h3>
+                            <p class="text-white/70 text-sm mb-6 leading-relaxed">
+                                Ao encerrar o caixa, será gerado um balanço do dia detalhando todas as entradas, sangrias e faturamento de mesas. Certifique-se de que todas as mesas estão livres antes de fechar.
+                            </p>
+
+                            <div class="bg-white/5 p-6 rounded-2xl mb-8 space-y-3 text-sm">
+                                <div class="flex justify-between">
+                                    <span class="text-white/60">Saldo de Caixa Esperado:</span>
+                                    <span class="font-bold" id="cashierExpectedDrawerBalance">R$ 150,00</span>
+                                </div>
+                                <div class="flex justify-between border-t border-white/10 pt-3">
+                                    <span class="text-white/60">Mesas Ativas:</span>
+                                    <span class="font-bold text-amber-300" id="cashierOpenTablesCount">0 ativas</span>
+                                </div>
+                            </div>
+
+                            <button onclick="triggerCashierClose()" class="w-full bg-[#c4a484] hover:bg-white hover:text-amber-950 text-white py-4 rounded-2xl font-bold uppercase tracking-widest text-sm shadow-xl transition-all flex items-center justify-center gap-2">
+                                <i class="fa-solid fa-lock"></i> Encerrar Expediente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="py-12 border-t border-gray-100 bg-white">
+        <div class="container mx-auto px-6 flex flex-col md:flex-row justify-between items-center gap-8">
+            <div class="text-center md:text-left">
+                <span class="text-lg font-black tracking-tighter">JJ CAFÉ</span>
+                <p class="text-gray-400 text-xs mt-2">© 2026 JJ Café Expresso. Todos os direitos reservados.</p>
+            </div>
+            <div class="flex gap-8">
+                <a href="#" class="text-gray-400 hover:text-black transition-colors font-bold text-[10px] uppercase tracking-widest">Instagram</a>
+                <a href="#" class="text-gray-400 hover:text-black transition-colors font-bold text-[10px] uppercase tracking-widest">Facebook</a>
+                <a href="#" class="text-gray-400 hover:text-black transition-colors font-bold text-[10px] uppercase tracking-widest">LinkedIn</a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Carrinho de Compras lateral -->
+    <div id="cartDrawer" class="fixed inset-y-0 right-0 w-full max-w-md bg-white z-50 shadow-2xl translate-x-full transition-transform duration-300 flex flex-col">
+        <div class="p-6 border-b border-gray-100 flex justify-between items-center bg-[#1a0f0d] text-white">
+            <div class="flex items-center gap-3">
+                <i class="fa-solid fa-basket-shopping text-xl text-[#c4a484]"></i>
+                <h3 class="text-lg font-bold">O Seu Pedido</h3>
+            </div>
+            <button onclick="toggleCartDrawer()" class="p-2 text-white/70 hover:text-white transition-colors">
+                <i class="fa-solid fa-xmark text-xl"></i>
+            </button>
+        </div>
+
+        <div class="flex-1 overflow-y-auto p-6 space-y-6" id="cartItemsContainer">
+            <!-- Gerado via Javascript -->
+        </div>
+
+        <div class="p-6 border-t border-gray-100 bg-gray-50 space-y-4">
+            <div>
+                <label class="block text-xs uppercase font-extrabold tracking-wider text-slate-500 mb-2">Identifique a sua Mesa para Envio</label>
+                <select id="checkoutTableSelect" class="w-full bg-white border border-gray-200 p-3.5 rounded-xl text-sm font-semibold outline-none focus:border-amber-600 shadow-sm">
+                    <option value="" disabled selected>Escolha a sua mesa...</option>
+                    <option value="1">Mesa 01</option>
+                    <option value="2">Mesa 02</option>
+                    <option value="3">Mesa 03</option>
+                    <option value="4">Mesa 04</option>
+                    <option value="5">Mesa 05</option>
+                    <option value="6">Mesa 06</option>
+                    <option value="7">Mesa 07</option>
+                    <option value="8">Mesa 08</option>
+                </select>
+            </div>
+
+            <div class="flex justify-between text-slate-800 font-bold text-lg mb-2">
+                <span>Total do Pedido:</span>
+                <span id="cartTotalValue">R$ 0,00</span>
+            </div>
+
+            <button onclick="submitClientOrder()" class="w-full bg-[#4E342E] hover:bg-[#2d1a15] text-white py-4 rounded-xl font-bold text-xs uppercase tracking-widest transition-all shadow-md">
+                Enviar Pedido para a Mesa
+            </button>
+        </div>
+    </div>
+
+    <!-- Overlay do Carrinho -->
+    <div id="cartOverlay" onclick="toggleCartDrawer()" class="fixed inset-0 bg-black/50 z-40 hidden transition-opacity"></div>
+
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+    <!-- Modais operacionais -->
+    <div id="customModal" class="fixed inset-0 z-50 flex items-center justify-center hidden">
+        <div class="absolute inset-0 bg-black/60 backdrop-blur-sm" onclick="closeModal()"></div>
+        <div class="relative bg-white rounded-[2rem] max-w-md w-full p-8 mx-4 shadow-2xl border border-slate-100 transform transition-transform scale-95" id="modalContentWrapper">
+            <!-- Preenchido via Javascript -->
+        </div>
+    </div>
+
+    <!-- --- JAVASCRIPT --- -->
+    <script>
+        const state = {
+            currentView: 'customer', 
+            activeStaffTab: 'mesas', 
+            products: [
+                { id: 1, name: 'Espresso Single', price: 8.00, category: 'coffee', desc: 'Extração pura de grãos 100% arábica com notas de avelã.', img: 'https://images.unsplash.com/photo-1514432324607-a09d9b4aefdd?q=80&w=600&auto=format&fit=crop' },
+                { id: 2, name: 'Cappuccino Italiano', price: 16.00, category: 'coffee', desc: 'O equilíbrio clássico entre espresso, leite e espuma aveludada.', img: 'https://images.unsplash.com/photo-1572442388796-11668a67e53d?q=80&w=600&auto=format&fit=crop' },
+                { id: 3, name: 'Cold Brew Nitro', price: 22.00, category: 'drinks', desc: 'Café infusionado a frio por 18h, servido com nitrogénio.', img: 'https://images.unsplash.com/photo-1461023058943-07fcbe16d735?q=80&w=600&auto=format&fit=crop' },
+                { id: 4, name: 'Latte Glacê', price: 18.00, category: 'drinks', desc: 'Espresso gelado batido com leite cremoso e raspas de chocolate.', img: 'https://images.unsplash.com/photo-1517701604599-bb29b565090c?q=80&w=600&auto=format&fit=crop' },
+                { id: 5, name: 'Croissant de Amêndoas', price: 15.00, category: 'food', desc: 'Massa folhada francesa artesanal recheada com creme de amêndoas.', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' },
+                { id: 6, name: 'Fatia de Torta Banoffee', price: 19.00, category: 'food', desc: 'Torta artesanal de banana, caramelo suave e chantilly.', img: 'https://images.unsplash.com/photo-1509440159596-0249088772ff?q=80&w=600&auto=format&fit=crop' }
+            ],
+            cart: [], 
+            tables: {
+                1: { id: 1, items: [], status: 'free' },
+                2: { id: 2, items: [], status: 'free' },
+                3: { id: 3, items: [], status: 'free' },
+                4: { id: 4, items: [], status: 'free' },
+                5: { id: 5, items: [], status: 'free' },
+                6: { id: 6, items: [], status: 'free' },
+                7: { id: 7, items: [], status: 'free' },
+                8: { id: 8, items: [], status: 'free' }
+            },
+            selectedTableId: null,
+            billingHistory: [], 
+            cashier: {
+                isOpen: true,
+                openedAt: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'}),
+                initialAmount: 150.00,
+                sales: 0.00,
+                adjustments: [], 
+                paymentMethodStats: {
+                    'Dinheiro': 0.00,
+                    'Cartão de Crédito': 0.00,
+                    'Cartão de Débito': 0.00,
+                    'PIX / Transferência': 0.00
+                }
+            }
+        };
+
+        window.addEventListener('DOMContentLoaded', () => {
+            renderClientMenu();
+            updateHeaderStyle();
+            injectDemoData();
+            renderTablesGrid();
+            updateBillingDashboard();
+            updateCashierDashboard();
+
+            window.addEventListener('scroll', updateHeaderStyle);
+        });
+
+        function updateHeaderStyle() {
+            const header = document.getElementById('mainHeader');
+            const logo = document.getElementById('logoText');
+            const navLinks = document.querySelectorAll('#mainNav a');
+            
+            if (state.currentView === 'staff') {
+                header.classList.add('bg-slate-900', 'shadow-xl', 'py-3');
+                header.classList.remove('py-4');
+                logo.classList.add('text-white');
+                navLinks.forEach(a => a.style.display = 'none');
+                return;
+            } else {
+                navLinks.forEach(a => a.style.display = 'block');
+            }
+
+            if (window.scrollY > 80) {
+                header.classList.add('bg-white', 'shadow-xl', 'py-3');
+                header.classList.remove('py-4');
+                logo.classList.remove('text-white');
+                logo.classList.add('text-[#1a0f0d]');
+                navLinks.forEach(a => {
+                    a.classList.remove('text-white/80', 'hover:text-white');
+                    a.classList.add('text-gray-600', 'hover:text-black');
+                });
+            } else {
+                header.classList.remove('bg-white', 'shadow-xl', 'py-3');
+                header.classList.add('py-4');
+                logo.classList.add('text-white');
+                logo.classList.remove('text-[#1a0f0d]');
+                navLinks.forEach(a => {
+                    a.classList.add('text-white/80', 'hover:text-white');
+                    a.classList.remove('text-gray-600', 'hover:text-black');
+                });
+            }
+        }
+
+        function scrollToSection(id) {
+            const section = document.getElementById(id);
+            if (section) {
+                section.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function injectDemoData() {
+            // Demonstração de faturação Mesa 3
+            state.billingHistory.push({
+                id: 'TKT-9421',
+                tableId: 3,
+                items: [
+                    { name: 'Espresso Single', price: 8.00, qty: 2 },
+                    { name: 'Croissant de Amêndoas', price: 15.00, qty: 1 }
+                ],
+                subtotal: 31.00,
+                tax: 3.10,
+                total: 34.10,
+                paymentMethod: 'PIX / Transferência',
+                timestamp: new Date(Date.now() - 45 * 60000).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            });
+            state.cashier.paymentMethodStats['PIX / Transferência'] += 34.10;
+            state.cashier.sales += 34.10;
+
+            // Demonstração de faturação Mesa 5
+            state.billingHistory.push({
+                id: 'TKT-9422',
+                tableId: 5,
+                items: [
+                    { name: 'Cappuccino Italiano', price: 16.00, qty: 1 },
+                    { name: 'Fatia de Torta Banoffee', price: 19.00, qty: 1 }
+                ],
+                subtotal: 35.00,
+                tax: 3.50,
+                total: 38.50,
+                paymentMethod: 'Dinheiro',
+                timestamp: new Date(Date.now() - 15 * 60000).toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            });
+            state.cashier.paymentMethodStats['Dinheiro'] += 38.50;
+            state.cashier.sales += 38.50;
+
+            // Demonstração de consumo Mesa 2
+            state.tables[2].status = 'active';
+            state.tables[2].items = [
+                { productId: 1, qty: 1 },
+                { productId: 5, qty: 2 }
+            ];
+
+            // Demonstração de consumo Mesa 6
+            state.tables[6].status = 'active';
+            state.tables[6].items = [
+                { productId: 3, qty: 2 },
+                { productId: 6, qty: 1 }
+            ];
+        }
+
+        function renderClientMenu() {
+            const menuContainer = document.getElementById('menuContainer');
+            menuContainer.innerHTML = '';
+
+            state.products.forEach(prod => {
+                const card = document.createElement('div');
+                card.className = 'product-card group bg-white rounded-3xl p-4 border border-gray-100 transition-all duration-300 hover:shadow-xl';
+                card.setAttribute('data-type', prod.category);
+                card.innerHTML = `
+                    <div class="overflow-hidden rounded-2xl mb-6 aspect-video bg-gray-50 relative">
+                        <img src="${prod.img}" alt="${prod.name}" class="product-img w-full h-full object-cover transition-transform duration-500">
+                        <span class="absolute top-4 right-4 bg-white/90 backdrop-blur text-[#4E342E] text-xs font-black px-3 py-1.5 rounded-full shadow-sm">
+                            R$ ${prod.price.toFixed(2).replace('.', ',')}
+                        </span>
+                    </div>
+                    <div class="px-2">
+                        <h3 class="text-2xl font-bold mb-2 text-slate-800">${prod.name}</h3>
+                        <p class="text-gray-500 text-sm leading-relaxed mb-6 h-12 overflow-hidden">${prod.desc}</p>
+                        <button onclick="addItemToCart(${prod.id})" class="w-full py-3.5 bg-slate-50 border border-gray-100 rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-[#4E342E] hover:text-white hover:border-[#4E342E] transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cart-plus"></i> Adicionar ao Pedido
+                        </button>
+                    </div>
+                `;
+                menuContainer.appendChild(card);
+            });
+        }
+
+        function filterMenu(category) {
+            const items = document.querySelectorAll('#menuContainer > div');
+            const tabs = document.querySelectorAll('.menu-tab');
+
+            tabs.forEach(tab => {
+                if (tab.getAttribute('data-category') === category) {
+                    tab.classList.add('menu-tab-active');
+                } else {
+                    tab.classList.remove('menu-tab-active');
+                }
+            });
+
+            items.forEach(item => {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(10px)';
+                
+                setTimeout(() => {
+                    if (category === 'all' || item.getAttribute('data-type') === category) {
+                        item.style.display = 'block';
+                        setTimeout(() => {
+                            item.style.opacity = '1';
+                            item.style.transform = 'translateY(0)';
+                        }, 50);
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }, 200);
+            });
+        }
+
+        function toggleSystemView() {
+            const mainHeader = document.getElementById('mainHeader');
+            const customerView = document.getElementById('customerView');
+            const staffView = document.getElementById('staffView');
+            const toggleBtn = document.getElementById('systemToggleBtn');
+            const viewBtnText = document.getElementById('viewBtnText');
+
+            if (state.currentView === 'customer') {
+                state.currentView = 'staff';
+                customerView.classList.add('hidden');
+                staffView.classList.remove('hidden');
+                viewBtnText.textContent = 'Ver Loja';
+                toggleBtn.classList.remove('bg-amber-100', 'text-[#4E342E]');
+                toggleBtn.classList.add('bg-slate-800', 'text-white', 'border-slate-700');
+                showToast('Painel Ativado', 'Modo de Gestão Operacional ativo.', 'info');
+            } else {
+                state.currentView = 'customer';
+                staffView.classList.add('hidden');
+                customerView.classList.remove('hidden');
+                viewBtnText.textContent = 'Painel Gestão';
+                toggleBtn.classList.remove('bg-slate-800', 'text-white', 'border-slate-700');
+                toggleBtn.classList.add('bg-amber-100', 'text-[#4E342E]');
+                showToast('Visualização de Cliente', 'Modo de Compras do Cliente ativo.', 'info');
+            }
+            updateHeaderStyle();
+        }
+
+        function switchStaffTab(tab) {
+            state.activeStaffTab = tab;
+            
+            document.querySelectorAll('.staff-tab').forEach(btn => {
+                btn.classList.remove('border-amber-600', 'text-amber-600');
+                btn.classList.add('border-transparent', 'text-slate-500');
+            });
+            const activeBtn = document.getElementById(`tabBtn-${tab}`);
+            if (activeBtn) {
+                activeBtn.classList.remove('border-transparent', 'text-slate-500');
+                activeBtn.classList.add('border-amber-600', 'text-amber-600');
+            }
+
+            document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+            const activePanel = document.getElementById(`panel-${tab}`);
+            if (activePanel) {
+                activePanel.classList.add('active');
+            }
+
+            if (tab === 'faturamento') {
+                updateBillingDashboard();
+            } else if (tab === 'caixa') {
+                updateCashierDashboard();
+            }
+        }
+
+        function toggleCartDrawer() {
+            const drawer = document.getElementById('cartDrawer');
+            const overlay = document.getElementById('cartOverlay');
+            
+            if (drawer.classList.contains('translate-x-full')) {
+                drawer.classList.remove('translate-x-full');
+                overlay.classList.remove('hidden');
+                renderCartItems();
+            } else {
+                drawer.classList.add('translate-x-full');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        function addItemToCart(prodId) {
+            const cartItem = state.cart.find(item => item.productId === prodId);
+            if (cartItem) {
+                cartItem.qty++;
+            } else {
+                state.cart.push({ productId: prodId, qty: 1 });
+            }
+            updateCartCount();
+            showToast('Produto Adicionado', 'Item adicionado ao seu pedido.', 'success');
+        }
+
+        function updateCartCount() {
+            const totalItems = state.cart.reduce((sum, item) => sum + item.qty, 0);
+            const badge = document.getElementById('cartCountBadge');
+            
+            if (totalItems > 0) {
+                badge.textContent = totalItems;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        }
+
+        function updateCartQty(prodId, change) {
+            const cartItem = state.cart.find(item => item.productId === prodId);
+            if (cartItem) {
+                cartItem.qty += change;
+                if (cartItem.qty <= 0) {
+                    state.cart = state.cart.filter(item => item.productId !== prodId);
+                }
+            }
+            renderCartItems();
+            updateCartCount();
+        }
+
+        function renderCartItems() {
+            const container = document.getElementById('cartItemsContainer');
+            const totalVal = document.getElementById('cartTotalValue');
+            container.innerHTML = '';
+            
+            if (state.cart.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-16 text-gray-400">
+                        <i class="fa-solid fa-basket-shopping text-4xl mb-4 text-gray-200"></i>
+                        <p class="font-bold">O seu pedido está vazio</p>
+                        <p class="text-xs mt-1">Selecione algumas especialidades no menu!</p>
+                    </div>
+                `;
+                totalVal.textContent = 'R$ 0,00';
+                return;
+            }
+
+            let grandTotal = 0;
+
+            state.cart.forEach(item => {
+                const prod = state.products.find(p => p.id === item.productId);
+                if (prod) {
+                    const itemTotal = prod.price * item.qty;
+                    grandTotal += itemTotal;
+
+                    const div = document.createElement('div');
+                    div.className = 'flex gap-4 items-center border-b border-gray-100 pb-4';
+                    div.innerHTML = `
+                        <img src="${prod.img}" alt="${prod.name}" class="w-16 h-16 rounded-xl object-cover">
+                        <div class="flex-1">
+                            <h4 class="font-bold text-slate-800 text-sm">${prod.name}</h4>
+                            <p class="text-xs text-[#c4a484] font-semibold mt-1">R$ ${prod.price.toFixed(2).replace('.', ',')}</p>
+                        </div>
+                        <div class="flex items-center gap-2.5">
+                            <button onclick="updateCartQty(${prod.id}, -1)" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-amber-100 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-minus"></i></button>
+                            <span class="font-bold text-sm text-slate-700 w-4 text-center">${item.qty}</span>
+                            <button onclick="updateCartQty(${prod.id}, 1)" class="w-7 h-7 rounded-full bg-slate-100 hover:bg-amber-100 flex items-center justify-center text-xs transition-colors"><i class="fa-solid fa-plus"></i></button>
+                        </div>
+                    `;
+                    container.appendChild(div);
+                }
+            });
+
+            totalVal.textContent = `R$ ${grandTotal.toFixed(2).replace('.', ',')}`;
+        }
+
+        function submitClientOrder() {
+            if (state.cart.length === 0) {
+                showToast('Carrinho Vazio', 'Adicione produtos antes de enviar o pedido.', 'error');
+                return;
+            }
+
+            const tableSelect = document.getElementById('checkoutTableSelect');
+            const tableId = tableSelect.value;
+
+            if (!tableId) {
+                showToast('Selecione uma Mesa', 'Escolha a sua mesa para podermos entregar o pedido.', 'error');
+                return;
+            }
+
+            const targetTable = state.tables[tableId];
+            state.cart.forEach(cartItem => {
+                const existingTableItem = targetTable.items.find(ti => ti.productId === cartItem.productId);
+                if (existingTableItem) {
+                    existingTableItem.qty += cartItem.qty;
+                } else {
+                    targetTable.items.push({ productId: cartItem.productId, qty: cartItem.qty });
+                }
+            });
+
+            targetTable.status = 'active';
+
+            state.cart = [];
+            tableSelect.selectedIndex = 0;
+            updateCartCount();
+            toggleCartDrawer();
+
+            renderTablesGrid();
+            updateCashierDashboard();
+
+            showToast('Pedido Enviado!', `O seu pedido está a ser preparado para a Mesa ${tableId}!`, 'success');
+        }
+
+        function renderTablesGrid() {
+            const container = document.getElementById('tablesGridContainer');
+            if (!container) return;
+            container.innerHTML = '';
+
+            Object.values(state.tables).forEach(table => {
+                let totalConsumo = 0;
+                table.items.forEach(item => {
+                    const prod = state.products.find(p => p.id === item.productId);
+                    if (prod) totalConsumo += prod.price * item.qty;
+                });
+
+                const isSelected = state.selectedTableId === table.id;
+                const statusClass = table.status === 'active' 
+                    ? 'border-amber-300 bg-amber-50/50 hover:bg-amber-50' 
+                    : 'border-slate-100 bg-white hover:bg-slate-50';
+                
+                const selectHighlight = isSelected ? 'ring-2 ring-amber-600 border-amber-600' : '';
+
+                const button = document.createElement('button');
+                button.onclick = () => selectStaffTable(table.id);
+                button.className = `p-5 rounded-2xl border text-left transition-all relative flex flex-col justify-between h-36 ${statusClass} ${selectHighlight} shadow-sm`;
+                button.innerHTML = `
+                    <div class="flex justify-between items-start w-full">
+                        <span class="font-extrabold text-lg text-slate-800">Mesa ${table.id.toString().padStart(2, '0')}</span>
+                        <span class="w-2.5 h-2.5 rounded-full ${table.status === 'active' ? 'bg-amber-500 animate-pulse' : 'bg-slate-300'}"></span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] uppercase font-bold tracking-wider text-slate-400 block">Consumo Atual</span>
+                        <span class="text-sm font-extrabold ${table.status === 'active' ? 'text-slate-800' : 'text-slate-400'}">
+                            R$ ${totalConsumo.toFixed(2).replace('.', ',')}
+                        </span>
+                    </div>
+                `;
+                container.appendChild(button);
+            });
+        }
+
+        function selectStaffTable(tableId) {
+            state.selectedTableId = tableId;
+            renderTablesGrid();
+            renderTableDetailsCard();
+        }
+
+        function renderTableDetailsCard() {
+            const card = document.getElementById('tableDetailsCard');
+            if (!card || !state.selectedTableId) return;
+
+            const table = state.tables[state.selectedTableId];
+            
+            if (table.items.length === 0) {
+                card.innerHTML = `
+                    <div class="flex justify-between items-center mb-6">
+                        <h4 class="text-lg font-bold text-slate-800">Mesa ${table.id.toString().padStart(2, '0')}</h4>
+                        <span class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-1 rounded-full font-bold">Livre</span>
+                    </div>
+                    <div class="text-center py-12 text-slate-400">
+                        <i class="fa-solid fa-mug-saucer text-4xl mb-3 text-slate-200"></i>
+                        <p class="font-bold">Mesa Sem Consumo</p>
+                        <p class="text-xs mt-2">Nenhum pedido foi enviado para esta mesa.</p>
+                    </div>
+                    <div class="border-t border-slate-100 pt-6 mt-6">
+                        <button onclick="addManualItemToTable(${table.id})" class="w-full bg-slate-800 hover:bg-slate-950 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Lançar Item Manual
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            let subtotal = 0;
+            let itemsHtml = '';
+
+            table.items.forEach(item => {
+                const prod = state.products.find(p => p.id === item.productId);
+                if (prod) {
+                    const total = prod.price * item.qty;
+                    subtotal += total;
+                    itemsHtml += `
+                        <div class="flex justify-between items-center text-sm py-3 border-b border-slate-50">
+                            <div>
+                                <span class="font-bold text-slate-800">${item.qty}x</span>
+                                <span class="text-slate-600 ml-1">${prod.name}</span>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span class="font-bold text-slate-700">R$ ${total.toFixed(2).replace('.', ',')}</span>
+                                <button onclick="removeTableItem(${table.id}, ${prod.id})" class="text-rose-500 hover:text-rose-700 text-xs"><i class="fa-solid fa-trash-can"></i></button>
+                            </div>
+                        </div>
+                    `;
+                }
+            });
+
+            const tax = subtotal * 0.10;
+            const totalMesa = subtotal + tax;
+
+            card.innerHTML = `
+                <div class="flex justify-between items-center mb-6">
+                    <h4 class="text-lg font-bold text-slate-800">Mesa ${table.id.toString().padStart(2, '0')}</h4>
+                    <span class="bg-amber-100 text-amber-800 text-xs px-2.5 py-1 rounded-full font-bold">Consumindo</span>
+                </div>
+
+                <div class="max-h-60 overflow-y-auto mb-6 pr-1">
+                    ${itemsHtml}
+                </div>
+
+                <div class="space-y-3 text-sm border-t border-slate-100 pt-6 mb-6">
+                    <div class="flex justify-between text-slate-500">
+                        <span>Subtotal:</span>
+                        <span>R$ ${subtotal.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between text-slate-500">
+                        <span>Serviço (10%):</span>
+                        <span>R$ ${tax.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between text-slate-800 font-extrabold text-lg pt-2 border-t border-dashed border-slate-200">
+                        <span>Total Geral:</span>
+                        <span>R$ ${totalMesa.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="addManualItemToTable(${table.id})" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-3 rounded-xl text-xs font-bold uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-plus"></i> Adicionar Item
+                    </button>
+                    <button onclick="initiateTableCheckout(${table.id}, ${totalMesa})" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-4 rounded-xl text-xs font-bold uppercase tracking-widest transition-all shadow-md flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-cash-register"></i> Fechar Mesa / Pagamento
+                    </button>
+                </div>
+            `;
+        }
+
+        function removeTableItem(tableId, prodId) {
+            const table = state.tables[tableId];
+            table.items = table.items.filter(item => item.productId !== prodId);
+            
+            if (table.items.length === 0) {
+                table.status = 'free';
+            }
+            
+            renderTablesGrid();
+            renderTableDetailsCard();
+            updateCashierDashboard();
+            showToast('Item Removido', 'Consumo da mesa updated.', 'info');
+        }
+
+        function addManualItemToTable(tableId) {
+            let optionsHtml = '';
+            state.products.forEach(p => {
+                optionsHtml += `<option value="${p.id}">${p.name} - R$ ${p.price.toFixed(2).replace('.', ',')}</option>`;
+            });
+
+            const content = `
+                <h3 class="text-xl font-bold text-slate-800 mb-6">Adicionar Item Manual - Mesa ${tableId.toString().padStart(2, '0')}</h3>
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Produto</label>
+                        <select id="manualProdId" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-sm font-semibold outline-none focus:border-amber-600">
+                            ${optionsHtml}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Quantidade</label>
+                        <input type="number" id="manualQty" value="1" min="1" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-sm outline-none focus:border-amber-600 font-bold">
+                    </div>
+                    <div class="flex gap-4 mt-6">
+                        <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">Cancelar</button>
+                        <button onclick="submitManualItem(${tableId})" class="flex-1 bg-[#4E342E] hover:bg-[#2d1a15] text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">Lançar Item</button>
+                    </div>
+                </div>
+            `;
+            showModal(content);
+        }
+
+        function submitManualItem(tableId) {
+            const prodId = parseInt(document.getElementById('manualProdId').value);
+            const qty = parseInt(document.getElementById('manualQty').value);
+
+            if (qty <= 0) return;
+
+            const table = state.tables[tableId];
+            const existing = table.items.find(i => i.productId === prodId);
+
+            if (existing) {
+                existing.qty += qty;
+            } else {
+                table.items.push({ productId: prodId, qty: qty });
+            }
+
+            table.status = 'active';
+
+            renderTablesGrid();
+            renderTableDetailsCard();
+            updateCashierDashboard();
+            closeModal();
+            showToast('Lançamento Concluído', 'Consumo atualizado com sucesso.', 'success');
+        }
+
+        function initiateTableCheckout(tableId, totalValue) {
+            if (!state.cashier.isOpen) {
+                showToast('Caixa Fechado', 'Precisa de abrir o caixa para registar pagamentos.', 'error');
+                return;
+            }
+
+            const table = state.tables[tableId];
+
+            const content = `
+                <h3 class="text-xl font-bold text-slate-800 mb-6">Recebimento - Mesa ${tableId.toString().padStart(2, '0')}</h3>
+                
+                <div class="space-y-4 mb-6">
+                    <div class="bg-amber-50 p-4 rounded-2xl flex justify-between items-center text-amber-900 border border-amber-100">
+                        <span class="font-bold text-sm">Valor total da conta:</span>
+                        <span class="font-extrabold text-xl">R$ ${totalValue.toFixed(2).replace('.', ',')}</span>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Método de Pagamento</label>
+                        <select id="paymentMethodSelect" class="w-full bg-slate-50 border border-slate-200 p-3.5 rounded-xl text-sm font-semibold outline-none focus:border-emerald-600">
+                            <option value="Dinheiro">Dinheiro</option>
+                            <option value="Cartão de Crédito">Cartão de Crédito</option>
+                            <option value="Cartão de Débito">Cartão de Débito</option>
+                            <option value="PIX / Transferência">PIX / Transferência</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">Cancelar</button>
+                    <button onclick="confirmTableCheckout(${tableId}, ${totalValue})" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md">Confirmar Pagamento</button>
+                </div>
+            `;
+            showModal(content);
+        }
+
+        function confirmTableCheckout(tableId, total) {
+            const method = document.getElementById('paymentMethodSelect').value;
+            const table = state.tables[tableId];
+
+            const historyItems = [];
+            let subtotal = 0;
+            table.items.forEach(item => {
+                const prod = state.products.find(p => p.id === item.productId);
+                if (prod) {
+                    subtotal += prod.price * item.qty;
+                    historyItems.push({
+                        name: prod.name,
+                        price: prod.price,
+                        qty: item.qty
+                    });
+                }
+            });
+
+            const transactionId = 'TKT-' + Math.floor(1000 + Math.random() * 9000);
+            const now = new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+
+            const bill = {
+                id: transactionId,
+                tableId: tableId,
+                items: historyItems,
+                subtotal: subtotal,
+                tax: subtotal * 0.1,
+                total: total,
+                paymentMethod: method,
+                timestamp: now
+            };
+
+            state.billingHistory.push(bill);
+            state.cashier.paymentMethodStats[method] += total;
+            state.cashier.sales += total;
+
+            table.items = [];
+            table.status = 'free';
+            state.selectedTableId = null;
+
+            renderTablesGrid();
+            renderTableDetailsCard();
+            updateBillingDashboard();
+            updateCashierDashboard();
+            
+            closeModal();
+            showReceiptModal(bill);
+            showToast('Pagamento Confirmado', `Mesa ${tableId} fechada com sucesso!`, 'success');
+        }
+
+        function showReceiptModal(bill) {
+            let itemsListHtml = '';
+            bill.items.forEach(i => {
+                itemsListHtml += `
+                    <div class="flex justify-between text-xs text-slate-600 py-1 border-b border-dashed border-slate-100">
+                        <span>${i.qty}x ${i.name}</span>
+                        <span>R$ ${(i.price * i.qty).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `;
+            });
+
+            const content = `
+                <div class="text-center pb-6 border-b border-slate-100 mb-6">
+                    <div class="w-12 h-12 bg-emerald-50 rounded-full flex items-center justify-center mx-auto mb-3">
+                        <i class="fa-solid fa-circle-check text-2xl text-emerald-500"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Transação Aprovada</h3>
+                    <p class="text-xs text-slate-400 mt-1">Nº Comprovativo: ${bill.id}</p>
+                </div>
+
+                <div class="space-y-4 mb-6">
+                    <div class="text-xs text-slate-400 flex justify-between uppercase font-extrabold tracking-wider">
+                        <span>Mesa: ${bill.tableId.toString().padStart(2, '0')}</span>
+                        <span>Hora: ${bill.timestamp}</span>
+                    </div>
+
+                    <div class="space-y-1">
+                        ${itemsListHtml}
+                    </div>
+
+                    <div class="space-y-2 text-xs pt-3 border-t border-slate-100 text-slate-500">
+                        <div class="flex justify-between">
+                            <span>Subtotal:</span>
+                            <span>R$ ${bill.subtotal.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span>Serviço (10%):</span>
+                            <span>R$ ${bill.tax.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="flex justify-between text-slate-800 font-extrabold text-sm pt-2 border-t border-dashed border-slate-200">
+                            <span>Valor Pago:</span>
+                            <span>R$ ${bill.total.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    </div>
+
+                    <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center text-xs text-slate-600">
+                        <span>Método:</span>
+                        <span class="font-bold">${bill.paymentMethod}</span>
+                    </div>
+                </div>
+
+                <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all">Fechar Recibo</button>
+            `;
+            showModal(content);
+        }
+
+        function updateBillingDashboard() {
+            const container = document.getElementById('billingHistoryTableBody');
+            if (!container) return;
+            container.innerHTML = '';
+
+            let totalTrans = state.billingHistory.length;
+            let totalFaturado = state.billingHistory.reduce((sum, b) => sum + b.total, 0);
+
+            const tableFreq = {};
+            state.billingHistory.forEach(b => {
+                tableFreq[b.tableId] = (tableFreq[b.tableId] || 0) + 1;
+            });
+            let bestTable = '-';
+            let maxFreq = 0;
+            Object.entries(tableFreq).forEach(([id, freq]) => {
+                if (freq > maxFreq) {
+                    maxFreq = freq;
+                    bestTable = `Mesa ${id.padStart(2, '0')}`;
+                }
+            });
+
+            const methods = state.cashier.paymentMethodStats;
+            let mainPayment = '-';
+            let maxAmount = 0;
+            Object.entries(methods).forEach(([m, amt]) => {
+                if (amt > maxAmount) {
+                    maxAmount = amt;
+                    mainPayment = m;
+                }
+            });
+
+            document.getElementById('statTotalTrans').textContent = totalTrans;
+            document.getElementById('statTotalFaturado').textContent = `R$ ${totalFaturado.toFixed(2).replace('.', ',')}`;
+            document.getElementById('statBestTable').textContent = bestTable;
+            document.getElementById('statMainPayment').textContent = mainPayment;
+
+            if (state.billingHistory.length === 0) {
+                container.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center py-12 text-slate-400 font-medium">Nenhuma transação registada hoje.</td>
+                    </tr>
+                `;
+                return;
+            }
+
+            [...state.billingHistory].reverse().forEach(bill => {
+                const tr = document.createElement('tr');
+                tr.className = 'border-b border-slate-50 hover:bg-slate-50/50 text-slate-700 text-sm font-medium';
+                tr.innerHTML = `
+                    <td class="py-4 px-4 font-bold text-slate-900">${bill.id}</td>
+                    <td class="py-4 px-4">Mesa ${bill.tableId.toString().padStart(2, '0')}</td>
+                    <td class="py-4 px-4 text-slate-400 text-xs">${bill.timestamp}</td>
+                    <td class="py-4 px-4 max-w-xs truncate text-slate-500 text-xs">${bill.items.map(i => `${i.qty}x ${i.name}`).join(', ')}</td>
+                    <td class="py-4 px-4"><span class="bg-slate-100 text-slate-700 text-[10px] uppercase font-bold px-2 py-1 rounded-full">${bill.paymentMethod}</span></td>
+                    <td class="py-4 px-4 text-right font-bold text-slate-900">R$ ${bill.total.toFixed(2).replace('.', ',')}</td>
+                `;
+                container.appendChild(tr);
+            });
+        }
+
+        function clearBillingHistory() {
+            state.billingHistory = [];
+            state.cashier.sales = 0.00;
+            Object.keys(state.cashier.paymentMethodStats).forEach(k => state.cashier.paymentMethodStats[k] = 0.00);
+
+            updateBillingDashboard();
+            updateCashierDashboard();
+            showToast('Histórico Limpo', 'O histórico de faturação foi limpo.', 'info');
+        }
+
+        function updateCashierDashboard() {
+            if (!document.getElementById('panel-caixa')) return;
+
+            const salesAmount = state.cashier.sales;
+            const initialAmount = state.cashier.initialAmount;
+
+            let totalAjustes = 0;
+            state.cashier.adjustments.forEach(adj => {
+                if (adj.type === 'suprimento') totalAjustes += adj.value;
+                if (adj.type === 'sangria') totalAjustes -= adj.value;
+            });
+
+            const salesInCash = state.cashier.paymentMethodStats['Dinheiro'];
+            const expectedDrawerBalance = initialAmount + salesInCash + totalAjustes;
+
+            document.getElementById('cashierInitialAmount').textContent = `R$ ${initialAmount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('cashierSalesAmount').textContent = `R$ ${salesAmount.toFixed(2).replace('.', ',')}`;
+            document.getElementById('cashierExpectedDrawerBalance').textContent = `R$ ${expectedDrawerBalance.toFixed(2).replace('.', ',')}`;
+
+            const openTables = Object.values(state.tables).filter(t => t.items.length > 0).length;
+            document.getElementById('cashierOpenTablesCount').textContent = `${openTables} mesa(s) ativa(s)`;
+
+            const breakdownContainer = document.getElementById('paymentMethodBreakdownContainer');
+            breakdownContainer.innerHTML = '';
+
+            Object.entries(state.cashier.paymentMethodStats).forEach(([method, value]) => {
+                const percent = salesAmount > 0 ? (value / salesAmount) * 100 : 0;
+                const div = document.createElement('div');
+                div.className = 'space-y-1.5';
+                div.innerHTML = `
+                    <div class="flex justify-between text-xs font-bold text-slate-600">
+                        <span>${method}</span>
+                        <span>R$ ${value.toFixed(2).replace('.', ',')} (${percent.toFixed(0)}%)</span>
+                    </div>
+                    <div class="w-full bg-slate-100 h-2.5 rounded-full overflow-hidden">
+                        <div class="bg-amber-600 h-full rounded-full transition-all duration-500" style="width: ${percent}%"></div>
+                    </div>
+                `;
+                breakdownContainer.appendChild(div);
+            });
+        }
+
+        function handleCashAdjustment(e) {
+            e.preventDefault();
+
+            if (!state.cashier.isOpen) {
+                showToast('Operação Inválida', 'O caixa encontra-se fechado.', 'error');
+                return;
+            }
+
+            const type = document.getElementById('adjustmentType').value;
+            const valInput = document.getElementById('adjustmentValue');
+            const value = parseFloat(valInput.value);
+
+            if (isNaN(value) || value <= 0) return;
+
+            state.cashier.adjustments.push({
+                type: type,
+                value: value,
+                timestamp: new Date().toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'})
+            });
+
+            valInput.value = '';
+            updateCashierDashboard();
+            
+            const actionText = type === 'suprimento' ? 'Suprimento registado com sucesso!' : 'Sangria de caixa realizada!';
+            showToast(type === 'suprimento' ? 'Suprimento de Caixa' : 'Sangria de Caixa', actionText, 'success');
+        }
+
+        function triggerCashierClose() {
+            const activeTablesCount = Object.values(state.tables).filter(t => t.items.length > 0).length;
+
+            if (activeTablesCount > 0) {
+                showToast('Ação Bloqueada', 'Existem mesas ativas. Liquide todas as contas antes de fechar o caixa.', 'error');
+                return;
+            }
+
+            let totalAjustes = 0;
+            let suprimentos = 0;
+            let sangrias = 0;
+            state.cashier.adjustments.forEach(adj => {
+                if (adj.type === 'suprimento') {
+                    totalAjustes += adj.value;
+                    suprimentos += adj.value;
+                }
+                if (adj.type === 'sangria') {
+                    totalAjustes -= adj.value;
+                    sangrias += adj.value;
+                }
+            });
+
+            const salesInCash = state.cashier.paymentMethodStats['Dinheiro'];
+            const expectedDrawerBalance = state.cashier.initialAmount + salesInCash + totalAjustes;
+            const totalFaturado = state.cashier.sales;
+
+            const content = `
+                <div class="text-center pb-6 border-b border-slate-100 mb-6">
+                    <div class="w-14 h-14 bg-amber-50 rounded-full flex items-center justify-center mx-auto mb-3 text-amber-900 text-2xl">
+                        <i class="fa-solid fa-lock"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-slate-800">Fecho do Caixa</h3>
+                    <p class="text-xs text-slate-400 mt-1">Deseja encerrar o expediente e fechar o caixa atual?</p>
+                </div>
+
+                <div class="space-y-4 mb-6 text-sm text-slate-700">
+                    <div class="flex justify-between">
+                        <span class="text-slate-400 font-medium">Troco Inicial:</span>
+                        <span class="font-bold">R$ ${state.cashier.initialAmount.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between">
+                        <span class="text-slate-400 font-medium">Vendas no Turno:</span>
+                        <span class="font-bold">R$ ${totalFaturado.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between text-emerald-600 font-medium">
+                        <span>Suprimentos (+):</span>
+                        <span>R$ ${suprimentos.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between text-rose-500 font-medium">
+                        <span>Sangrias (-):</span>
+                        <span>R$ ${sangrias.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    <div class="flex justify-between text-slate-800 font-extrabold text-base pt-3 border-t border-dashed border-slate-200">
+                        <span>Total do Fecho:</span>
+                        <span>R$ ${expectedDrawerBalance.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                </div>
+
+                <div class="flex gap-4">
+                    <button onclick="closeModal()" class="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-800 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all">Voltar</button>
+                    <button onclick="confirmCashierClose(${expectedDrawerBalance})" class="flex-1 bg-amber-800 hover:bg-amber-900 text-white py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all shadow-md">Confirmar Fecho</button>
+                </div>
+            `;
+            showModal(content);
+        }
+
+        function confirmCashierClose(balanceFinal) {
+            state.cashier.isOpen = false;
+            
+            document.getElementById('cashierStatusIndicator').classList.remove('bg-emerald-500');
+            document.getElementById('cashierStatusIndicator').classList.add('bg-rose-500');
+            document.getElementById('cashierStatusText').textContent = 'Fechado';
+
+            closeModal();
+            showToast('Expediente Concluído', 'Caixa fechado com sucesso!', 'success');
+
+            let methodsSummaryHtml = '';
+            Object.entries(state.cashier.paymentMethodStats).forEach(([m, val]) => {
+                methodsSummaryHtml += `
+                    <div class="flex justify-between py-1 text-slate-600 border-b border-slate-50">
+                        <span>${m}:</span>
+                        <span class="font-bold">R$ ${val.toFixed(2).replace('.', ',')}</span>
+                    </div>
+                `;
+            });
+
+            const content = `
+                <div class="text-center pb-6 border-b border-slate-100 mb-6">
+                    <div class="w-12 h-12 bg-rose-50 rounded-full flex items-center justify-center mx-auto mb-3 text-rose-500 text-xl">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3 class="text-lg font-bold text-slate-800">Relatório de Encerramento</h3>
+                    <p class="text-[10px] text-slate-400 uppercase font-extrabold tracking-wider mt-1">Caixa Encerrado</p>
+                </div>
+
+                <div class="space-y-4 mb-6 text-xs text-slate-700">
+                    <div class="space-y-1">
+                        <h4 class="font-bold text-slate-400 uppercase tracking-wide text-[10px]">Movimento do Dia</h4>
+                        ${methodsSummaryHtml}
+                    </div>
+
+                    <div class="bg-slate-50 p-4 rounded-2xl space-y-2 border border-slate-100">
+                        <div class="flex justify-between">
+                            <span>Fundo de Troco Inicial:</span>
+                            <span>R$ ${state.cashier.initialAmount.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                        <div class="flex justify-between border-t border-slate-200/50 pt-2 text-slate-800 font-extrabold">
+                            <span>Total Geral em Caixa:</span>
+                            <span>R$ ${balanceFinal.toFixed(2).replace('.', ',')}</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="space-y-3">
+                    <button onclick="window.print()" class="w-full bg-slate-800 hover:bg-slate-900 text-white py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all flex items-center justify-center gap-2">
+                        <i class="fa-solid fa-print"></i> Imprimir Balanço
+                    </button>
+                    <button onclick="reopenCashier()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-800 py-3.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all">Reabrir Turno</button>
+                </div>
+            `;
+            setTimeout(() => {
+                showModal(content);
+            }, 300);
+        }
+
+        function reopenCashier() {
+            state.cashier.isOpen = true;
+            document.getElementById('cashierStatusIndicator').classList.add('bg-emerald-500');
+            document.getElementById('cashierStatusIndicator').classList.remove('bg-rose-500');
+            document.getElementById('cashierStatusText').textContent = 'Aberto';
+            closeModal();
+            updateCashierDashboard();
+            showToast('Caixa Reaberto', 'O caixa está pronto para registar pagamentos.', 'info');
+        }
+
+        function handleContactSubmit(e) {
+            e.preventDefault();
+            const name = document.getElementById('contactName').value;
+            const email = document.getElementById('contactEmail').value;
+            const msg = document.getElementById('contactMsg').value;
+
+            if (!name || !email || !msg) return;
+
+            document.getElementById('feedbackForm').reset();
+            showToast('Feedback Enviado', `Olá ${name}! Recebemos a sua mensagem. Responderemos o mais breve possível!`, 'success');
+        }
+
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toastContainer');
+            
+            let iconClass = 'fa-circle-info text-blue-500';
+            let bgBorder = 'border-blue-100 bg-white';
+            
+            if (type === 'success') {
+                iconClass = 'fa-circle-check text-emerald-500';
+                bgBorder = 'border-emerald-100 bg-white';
+            } else if (type === 'error') {
+                iconClass = 'fa-circle-xmark text-rose-500';
+                bgBorder = 'border-rose-100 bg-white';
+            }
+
+            const toast = document.createElement('div');
+            toast.className = `p-4 rounded-2xl border ${bgBorder} shadow-lg flex gap-3.5 w-80 transform translate-y-2 opacity-0 transition-all duration-300 pointer-events-auto`;
+            toast.innerHTML = `
+                <div class="text-xl mt-0.5"><i class="fa-solid ${iconClass}"></i></div>
+                <div>
+                    <h5 class="font-bold text-sm text-slate-800">${title}</h5>
+                    <p class="text-xs text-slate-500 mt-1 leading-relaxed">${message}</p>
+                </div>
+            `;
+
+            container.appendChild(toast);
+
+            setTimeout(() => {
+                toast.classList.remove('translate-y-2', 'opacity-0');
+            }, 50);
+
+            setTimeout(() => {
+                toast.classList.add('translate-y-2', 'opacity-0');
+                setTimeout(() => {
+                    toast.remove();
+                }, 300);
+            }, 4500);
+        }
+
+        function showModal(contentHtml) {
+            const modal = document.getElementById('customModal');
+            const wrapper = document.getElementById('modalContentWrapper');
+            
+            wrapper.innerHTML = contentHtml;
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                wrapper.classList.remove('scale-95');
+                wrapper.classList.add('scale-100');
+            }, 50);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('customModal');
+            const wrapper = document.getElementById('modalContentWrapper');
+            
+            wrapper.classList.remove('scale-100');
+            wrapper.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 150);
+        }
+    </script>
+</body>
+</html>
